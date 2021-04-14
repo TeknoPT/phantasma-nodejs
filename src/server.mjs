@@ -16,8 +16,8 @@ app.get('/', (req, res) => {
 
 app.get("/example", (req, res) => {
   let wif = "L2LGgkZAdupN2ee8Rs6hpkc65zaGcLbxhbSDGq8oh6umUxxzeW25"
-
-  var script = CreateTxScript("SOUL", 8, wif, "fromAddress", [{"userAddress":"P2KKxTbPSBKMRRL9vw6NYXsNCKTX1ZfoE2bvAuq6VwZSYuy", "value": 100}]);
+  let address = Utils.getAddressFromWif(wif)
+  var script = CreateTxScript("SOUL", 8, address, [{"userAddress":"P2KKxTbPSBKMRRL9vw6NYXsNCKTX1ZfoE2bvAuq6VwZSYuy", "value": 100}]);
   var txData = {
     "nexus" : "https://localhost:7777",
     "chain" : "main",
@@ -72,9 +72,8 @@ destinations = [{
   "userAddress" : "",
   "value" : 1001
 }] */
-function CreateTxScript(symbol, decimals, wif, from, destinations = [])
+function CreateTxScript(symbol, decimals, from, destinations = [])
 {
-    const privateKey = Utils.getPrivateKeyFromWif(wif);
     const gasFee = 100000;
 
     var fromAddress = from;
@@ -82,7 +81,7 @@ function CreateTxScript(symbol, decimals, wif, from, destinations = [])
     var gasLimit = 2100;
     let sb = new ScriptBuilder();
 
-    var scriptB = sb.allowGas(privateKey, sb.nullAddress(), gasFee, gasLimit);
+    var scriptB = sb.allowGas(fromAddress, sb.nullAddress(), gasFee, gasLimit);
 
     // Add Transfer tokens.
     destinations.forEach(entry => {
@@ -91,7 +90,7 @@ function CreateTxScript(symbol, decimals, wif, from, destinations = [])
       scriptB.transferTokens(symbol, fromAddress, targetAddress, amount);
     });
 
-    var script = scriptB.spendGas(privateKey).
+    var script = scriptB.spendGas(fromAddress).
         endScript();
     console.log(script);
     return script;
