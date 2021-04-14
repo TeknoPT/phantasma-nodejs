@@ -4,6 +4,7 @@ import PhantasmaAPI from './../libs/rpc/phantasma.cjs'
 import ScriptBuilder from './ScriptBuilder.mjs'
 import Transaction from './../libs/tx/Transaction.cjs';
 import Utils from './../libs/tx/utils.cjs';
+import { getAddressFromWif } from '../libs/tx/utils.cjs';
 
 const app = express()
 const port = 3000
@@ -16,8 +17,11 @@ app.get('/', (req, res) => {
 
 app.get("/example", (req, res) => {
   let wif = "L2LGgkZAdupN2ee8Rs6hpkc65zaGcLbxhbSDGq8oh6umUxxzeW25"
-  let address = Utils.getAddressFromWif(wif)
-  var script = CreateTxScript("SOUL", 8, address, [{"userAddress":"P2KKxTbPSBKMRRL9vw6NYXsNCKTX1ZfoE2bvAuq6VwZSYuy", "value": 100}]);
+  let addr = getAddressFromWif(wif);
+  var decimals = 8;
+
+  var script = CreateTxScript("SOUL", addr, [
+    {"userAddress":"P2KKxTbPSBKMRRL9vw6NYXsNCKTX1ZfoE2bvAuq6VwZSYuy", "value": 100 * 10 ** decimals}]);
   var txData = {
     "nexus" : "https://localhost:7777",
     "chain" : "main",
@@ -72,12 +76,9 @@ destinations = [{
   "userAddress" : "",
   "value" : 1001
 }] */
-function CreateTxScript(symbol, decimals, from, destinations = [])
+function CreateTxScript(symbol, fromAddress, destinations = [])
 {
     const gasFee = 100000;
-
-    var fromAddress = from;
-
     var gasLimit = 2100;
     let sb = new ScriptBuilder();
 
@@ -86,8 +87,7 @@ function CreateTxScript(symbol, decimals, from, destinations = [])
     // Add Transfer tokens.
     destinations.forEach(entry => {
       var targetAddress = entry.userAddress;
-      var amount = phantasmaAPI.convertDecimals(entry.value, decimals);
-      scriptB.transferTokens(symbol, fromAddress, targetAddress, amount);
+      scriptB.transferTokens(symbol, fromAddress, targetAddress, entry.value);
     });
 
     var script = scriptB.spendGas(fromAddress).
