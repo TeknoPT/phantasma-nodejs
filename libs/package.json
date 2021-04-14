@@ -1,0 +1,22 @@
+{
+  "name": "nodejssample",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "dependencies": {
+    "elliptic": "^6.5.4",
+    "express": "^4.17.1",
+    "ffi-napi": "^4.0.3"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.13.14",
+    "@babel/core": "^7.13.15",
+    "@babel/preset-env": "^7.13.15"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "babel src --out-dir dist"
+  },
+  "author": "",
+  "license": "ISC"
+}
