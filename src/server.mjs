@@ -14,7 +14,7 @@ app.get('/', (req, res) => {
   res.send('Hello World!')
 })
 
-app.get("/example", (req, res) => {
+app.get("/example", async (req, res) => {
   let wif = "L2LGgkZAdupN2ee8Rs6hpkc65zaGcLbxhbSDGq8oh6umUxxzeW25"
   let addr = UtilsTransaction.getAddressFromWif(wif);
   var decimals = 8;
@@ -30,9 +30,8 @@ app.get("/example", (req, res) => {
     "payload" : Utils.byteArrayToHex(sb.rawString("exchangeSTUFF"))
   }
 
-  var hash = exampleTransaction(txData, wif);
-  //var result = getTransactionExample(hash);
-  var result = "b"
+  var hash = await exampleTransaction(txData, wif);
+  var result = await getTransactionExample(hash);
   res.send(hash+"<br>"+result);
 })
 
@@ -51,7 +50,7 @@ app.listen(port, () => {
  * @param wif => wif 
  * @returns 
  */
-function exampleTransaction(txData, wif){
+async function exampleTransaction(txData, wif){
   
   const dt = new Date();
   dt.setMinutes(dt.getMinutes() + 5);
@@ -70,14 +69,15 @@ function exampleTransaction(txData, wif){
 
   let value = tx1.toString(true);
   console.log(value);
-  const hash = phantasmaAPI.sendRawTransaction(value);
+  const hash = await phantasmaAPI.sendRawTransaction(value);
   console.log("Returned from sendRawTransaction with res: ", hash);
-
-  return hash;
+  return new Promise(resolve => {
+    resolve(hash);
+  });
 }
 
 /**
- * 
+ * Create a Transaction Script
  * @param symbol 
  * @param fromAddress => Address Sending
  * @param destinations => Destinations Array
@@ -104,7 +104,7 @@ function CreateTxScript(symbol, fromAddress, destinations = [])
     return script;
 }
 
-function getTransactionExample(hash){
+async function getTransactionExample(hash){
   var result = phantasmaAPI.getTransaction(hash);
   return result;
 }
