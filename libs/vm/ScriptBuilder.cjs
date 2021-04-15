@@ -272,7 +272,11 @@ var ScriptBuilder = /** @class */ (function () {
         return this.callContract(Nexus.GasContractName, "SpendGas", [address]);
     };
     ScriptBuilder.prototype.transferTokens = function (symbol, fromAddress, targetAddress, amount) {
-        return this.callContract( Nexus.SwapContractName, "", [symbol, fromAddress, targetAddress, amount]);
+        return this.callInterop("Runtime.TransferTokens", [
+			fromAddress, 
+			targetAddress, 
+            symbol,
+			amount]);
     }
     ScriptBuilder.prototype.callRPC = function (methodName, params) {
         return __awaiter(this, void 0, void 0, function () {

@@ -1,10 +1,9 @@
 import express from 'express'
 import PhantasmaAPI from './../libs/rpc/phantasma.cjs'
-//import ScriptBuilder from './../libs/vm/ScriptBuilder.cjs'
-import ScriptBuilder from './ScriptBuilder.mjs'
+import ScriptBuilder from './../libs/vm/ScriptBuilder.cjs'
 import Transaction from './../libs/tx/Transaction.cjs';
-import Utils from './../libs/tx/utils.cjs';
-import { getAddressFromWif } from '../libs/tx/utils.cjs';
+import Utils from './../libs/utils/index.cjs';
+import UtilsTransaction from '../libs/tx/utils.cjs';
 
 const app = express()
 const port = 3000
@@ -17,37 +16,41 @@ app.get('/', (req, res) => {
 
 app.get("/example", (req, res) => {
   let wif = "L2LGgkZAdupN2ee8Rs6hpkc65zaGcLbxhbSDGq8oh6umUxxzeW25"
-  let addr = getAddressFromWif(wif);
+  let addr = UtilsTransaction.getAddressFromWif(wif);
   var decimals = 8;
 
   var script = CreateTxScript("SOUL", addr, [
-    {"userAddress":"P2KKxTbPSBKMRRL9vw6NYXsNCKTX1ZfoE2bvAuq6VwZSYuy", "value": 100 * 10 ** decimals}]);
+    {"userAddress":"P2KKxTbPSBKMRRL9vw6NYXsNCKTX1ZfoE2bvAuq6VwZSYuy", "value": 1000 * 10 ** decimals}]);
+
+  var sb = new ScriptBuilder.ScriptBuilder();
   var txData = {
-    "nexus" : "https://localhost:7777",
-    "chain" : "main",
+    "nexus" : 'simnet',
+    "chain" : 'main',
     "script" : script,
-    "payload" : "trade"
+    "payload" : Utils.byteArrayToHex(sb.rawString("exchangeSTUFF"))
   }
 
-  exampleTransaction(txData, wif);
-  
-  res.send(".");
+  var hash = exampleTransaction(txData, wif);
+  //var result = getTransactionExample(hash);
+  var result = "b"
+  res.send(hash+"<br>"+result);
 })
 
 app.listen(port, () => {
   console.log(`Example app listening at http://localhost:${port}`)
 })
 
-// Other
-/*
-TXData Example: 
-var txData = {
-  "nexus" : "main", // nexus
-  "chain" : "main", // chain 
-  "script" : script, // Script Created with ScriptBuilder.
-  "payload" : "trade" // Your payload
-}
-*/
+/**
+ * 
+ * @param txData = {
+      "nexus" : "main", // nexus
+      "chain" : "main", // chain 
+      "script" : script, // Script Created with ScriptBuilder.
+      "payload" : "trade" // Your payload
+    }
+ * @param wif => wif 
+ * @returns 
+ */
 function exampleTransaction(txData, wif){
   
   const dt = new Date();
@@ -62,27 +65,32 @@ function exampleTransaction(txData, wif){
     txData.payload
   );
 
-  const privateKey = Utils.getPrivateKeyFromWif(wif);
+  const privateKey = UtilsTransaction.getPrivateKeyFromWif(wif);
   tx1.sign(privateKey);
 
-  const hash = phantasmaAPI.sendRawTransaction(tx1.toString(true));
+  let value = tx1.toString(true);
+  console.log(value);
+  const hash = phantasmaAPI.sendRawTransaction(value);
   console.log("Returned from sendRawTransaction with res: ", hash);
 
   return hash;
 }
 
-/*
-destinations = [{
-  "userAddress" : "",
-  "value" : 1001
-}] */
+/**
+ * 
+ * @param symbol 
+ * @param fromAddress => Address Sending
+ * @param destinations => Destinations Array
+ * [{"userAddress" : "address", "value": 100000000}]
+ * @returns 
+ */
 function CreateTxScript(symbol, fromAddress, destinations = [])
 {
     const gasFee = 100000;
-    var gasLimit = 2100;
-    let sb = new ScriptBuilder();
+    const gasLimit = 2100;
+    let sb = new ScriptBuilder.ScriptBuilder();
 
-    var scriptB = sb.allowGas(fromAddress, sb.nullAddress(), gasFee, gasLimit);
+    var scriptB = sb.allowGas(fromAddress, sb.nullAddress, gasFee, gasLimit);
 
     // Add Transfer tokens.
     destinations.forEach(entry => {
@@ -92,38 +100,11 @@ function CreateTxScript(symbol, fromAddress, destinations = [])
 
     var script = scriptB.spendGas(fromAddress).
         endScript();
-    console.log(script);
+
     return script;
 }
 
-/*
-async signTx(txdata: TxArgsData, wif: string): Promise<string> {
-    const account = this.currentAccount;
-    if (!account) throw new Error(this.$i18n.t("error.notValid").toString());
-
-    if (!this.isWifValidForAccount(wif))
-      throw new Error(this.$i18n.t("error.noAccountMatch").toString());
-
-    const address = account.address;
-
-    const dt = new Date();
-    dt.setMinutes(dt.getMinutes() + 5);
-    console.log(dt);
-    const tx = new Transaction(
-      txdata.nexus,
-      txdata.chain,
-      txdata.script,
-      dt,
-      txdata.payload
-    );
-
-    const privateKey = getPrivateKeyFromWif(wif);
-
-    tx.sign(privateKey);
-
-    const hash = await this.api.sendRawTransaction(tx.toString(true));
-    console.log("Returned from sendRawTransaction with res: ", hash);
-
-    return hash;
-  }
- */
+function getTransactionExample(hash){
+  var result = phantasmaAPI.getTransaction(hash);
+  return result;
+}
