@@ -3,7 +3,9 @@ PhantasmaNodeJS
 
 # How to install
 - npm install
-- npm start
+
+# How to run
+- After installing all the dependencies run `npm start`
 
 # How to configure
 - Inside the folder src, the `server.mjs` has all the methods that you need to create call to the blockchain.
@@ -17,9 +19,9 @@ import Transaction from './../libs/tx/Transaction.cjs';
 import Utils from './../libs/utils/index.cjs';
 import UtilsTransaction from '../libs/tx/utils.cjs';
 ``` 
-- In this classes you have all the things you need to encrypt and make a transaction, and get private keys and address so you can make them
+- In this classes you have all the things you need to encrypt, make a transaction, get private keys and address so you can make them.
 - Get an address from wif example: ```let addr = UtilsTransaction.getAddressFromWif(wif);```
-- The code needs to have an PhantasmaAPI instance so you can send a Transaction and get a transaction and do other things with it.
+- The code needs to have an PhantasmaAPI instance so you can send a Transaction, get a transaction and do other things with it.
 ```
 const phantasmaAPI = new PhantasmaAPI.PhantasmaAPI("http://127.0.0.1:7081/rpc", "http://127.0.0.1:7078/api"); // Change this address to the chain rpc and api
 ```
