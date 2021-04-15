@@ -5,8 +5,7 @@
   "main": "server.js",
   "dependencies": {
     "elliptic": "^6.5.4",
-    "express": "^4.17.1",
-    "ffi-napi": "^4.0.3"
+    "express": "^4.17.1"
   },
   "devDependencies": {
     "@babel/cli": "^7.13.14",

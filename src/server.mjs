@@ -7,7 +7,7 @@ import UtilsTransaction from '../libs/tx/utils.cjs';
 
 const app = express()
 const port = 3000
-const phantasmaAPI = new PhantasmaAPI.PhantasmaAPI("http://127.0.0.1:7081/rpc", "http://127.0.0.1:7078/api");
+const phantasmaAPI = new PhantasmaAPI.PhantasmaAPI("http://127.0.0.1:7081/rpc", "http://127.0.0.1:7078/api"); // Change this address to the chain rpc and api
 
 // Web server
 app.get('/', (req, res) => {
@@ -17,17 +17,18 @@ app.get('/', (req, res) => {
 app.get("/example", async (req, res) => {
   let wif = "L2LGgkZAdupN2ee8Rs6hpkc65zaGcLbxhbSDGq8oh6umUxxzeW25"
   let addr = UtilsTransaction.getAddressFromWif(wif);
-  var decimals = 8;
+  let amountToTransfer = 1000;
 
   var script = CreateTxScript("SOUL", addr, [
-    {"userAddress":"P2KKxTbPSBKMRRL9vw6NYXsNCKTX1ZfoE2bvAuq6VwZSYuy", "value": 1000 * 10 ** decimals}]);
+    {"userAddress":"P2KKxTbPSBKMRRL9vw6NYXsNCKTX1ZfoE2bvAuq6VwZSYuy", "value": amountToTransfer * 10 ** GetDecimals("SOUL")}
+  ]);
 
   var sb = new ScriptBuilder.ScriptBuilder();
   var txData = {
-    "nexus" : 'simnet',
-    "chain" : 'main',
-    "script" : script,
-    "payload" : Utils.byteArrayToHex(sb.rawString("exchangeSTUFF"))
+    "nexus" : 'simnet', // This is just for test porpuses
+    "chain" : 'main', // The chain name
+    "script" : script, // Script create for the transaction
+    "payload" : Utils.byteArrayToHex(sb.rawString("exchangeSTUFF")) // Hex of the payload
   }
 
   var hash = await exampleTransaction(txData, wif);
@@ -40,7 +41,7 @@ app.listen(port, () => {
 })
 
 /**
- * 
+ * Example Transaction, it will be executed to the chain.
  * @param txData = {
       "nexus" : "main", // nexus
       "chain" : "main", // chain 
@@ -71,6 +72,7 @@ async function exampleTransaction(txData, wif){
   console.log(value);
   const hash = await phantasmaAPI.sendRawTransaction(value);
   console.log("Returned from sendRawTransaction with res: ", hash);
+
   return new Promise(resolve => {
     resolve(hash);
   });
@@ -105,6 +107,17 @@ function CreateTxScript(symbol, fromAddress, destinations = [])
 }
 
 async function getTransactionExample(hash){
-  var result = phantasmaAPI.getTransaction(hash);
-  return result;
+  return new Promise(resolve => {
+    setTimeout(function(){
+      var result = phantasmaAPI.getTransaction(hash);
+      resolve(result);
+    },5000);
+  });
+}
+
+function GetDecimals(symbol){
+  switch(symbol){
+    case "SOUL": return 8;
+    case "KCAL": return 10;
+  }
 }
