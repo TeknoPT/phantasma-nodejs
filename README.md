@@ -22,8 +22,13 @@ import UtilsTransaction from '../libs/tx/utils.cjs';
 - In this classes you have all the things you need to encrypt, make a transaction, get private keys and address so you can make them.
 - Get an address from wif example: ```let addr = UtilsTransaction.getAddressFromWif(wif);```
 - The code needs to have an PhantasmaAPI instance so you can send a Transaction, get a transaction and do other things with it.
+- For the RPC version use this:
 ```
 const phantasmaAPI = new PhantasmaAPI.PhantasmaAPI("http://127.0.0.1:7081/rpc", "http://127.0.0.1:7078/api"); // Change this address to the chain rpc and api
+```
+- For the REST version add 3rd `false` so you set to RPC mode to false:
+```
+const phantasmaAPI = new PhantasmaAPI.PhantasmaAPI("http://127.0.0.1:7081/rpc", "http://127.0.0.1:7078/api", false); // Change this address to the chain rpc and api
 ```
 - TxData is an array of object that is used to create a transaction, example:
 ```

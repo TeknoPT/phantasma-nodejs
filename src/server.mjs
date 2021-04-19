@@ -7,11 +7,14 @@ import UtilsTransaction from '../libs/tx/utils.cjs';
 
 const app = express()
 const port = 3000
-const phantasmaAPI = new PhantasmaAPI.PhantasmaAPI("http://127.0.0.1:7081/rpc", "http://127.0.0.1:7078/api"); // Change this address to the chain rpc and api
+const phantasmaAPI = new PhantasmaAPI.PhantasmaAPI("http://127.0.0.1:7081/rpc", "http://127.0.0.1:7078/api", false); // Change this address to the chain rpc and api
 
 // Web server
-app.get('/', (req, res) => {
-  res.send('Hello World!')
+app.get('/', async (req, res) => {
+  let params = {"chainInput": "main"};
+  let a = await phantasmaAPI.getTransaction("089EF8EE51036E8984C0FF26C7DA074C742B1A39654B7B521AEB52875D8F450C");
+  console.log("received", a)
+  res.send(a)
 })
 
 app.get("/example", async (req, res) => {

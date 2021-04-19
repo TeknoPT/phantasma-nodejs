@@ -42,11 +42,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var cross_fetch_1 = __importDefault(require("cross-fetch"));
 var PhantasmaAPI = /** @class */ (function () {
-    function PhantasmaAPI(defHost, peersUrlJson) {
+    function PhantasmaAPI(defHost, peersUrlJson, isRPC = true) {
         var _this = this;
         this.rpcName = "Auto";
         this.nexus = "mainnet";
         this.host = defHost;
+        this.isRPC = isRPC;
+        this.apiHost = peersUrlJson;
         this.availableHosts = [];
         cross_fetch_1.default(peersUrlJson + "?_=" + new Date().getTime()).then(function (res) { return __awaiter(_this, void 0, void 0, function () {
             var data, i, msecs, err_1;
@@ -140,6 +142,43 @@ var PhantasmaAPI = /** @class */ (function () {
             });
         });
     };
+
+    PhantasmaAPI.prototype.RESTAPI = function (method, params) {
+        return __awaiter(this, void 0, void 0, function () {
+            var res, resJson;
+            return __generator(this, function (_a) {
+
+                let apiCall = this.apiHost + "/" + method;
+
+                for (var key in params) {
+                    // skip loop if the property is from prototype
+                    if (!params.hasOwnProperty(key)) continue;
+                
+                    apiCall += "/" + params[key];
+                }
+  
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, cross_fetch_1.default(apiCall, {
+                            method: "GET",
+                            mode: "cors"
+                        })];
+                    case 1:
+                        res = _a.sent();
+                        return [4 /*yield*/, res.json()];
+                    case 2:
+                        resJson = _a.sent();
+                        console.log("method", method, resJson);
+                        if (resJson.error) {
+                            if (resJson.error.message)
+                                return [2 /*return*/, { error: resJson.error.message }];
+                            return [2 /*return*/, { error: resJson.error }];
+                        }
+                        return [4 /*yield*/, resJson];
+                    case 3: return [2 /*return*/, _a.sent()];
+                }
+            });
+        });
+    };
     PhantasmaAPI.prototype.setRpcHost = function (rpcHost) {
         this.host = rpcHost;
     };
@@ -180,7 +219,11 @@ var PhantasmaAPI = /** @class */ (function () {
                 switch (_a.label) {
                     case 0:
                         params = [account];
-                        return [4 /*yield*/, this.JSONRPC("getAccount", params)];
+                        if ( this.isRPC )
+                            return [4 /*yield*/, this.JSONRPC("getAccount", params)];
+                        else
+                            return [4 /*yield*/, this.RESTAPI("getAccount", params)];
+
                     case 1: return [2 /*return*/, (_a.sent())];
                 }
             });
@@ -194,7 +237,10 @@ var PhantasmaAPI = /** @class */ (function () {
                 switch (_a.label) {
                     case 0:
                         params = [name];
-                        return [4 /*yield*/, this.JSONRPC("lookUpName", params)];
+                        if ( this.isRPC )
+                            return [4 /*yield*/, this.JSONRPC("lookUpName", params)];
+                        else 
+                            return [4 /*yield*/, this.RESTAPI("lookUpName", params)];
                     case 1: return [2 /*return*/, (_a.sent())];
                 }
             });
@@ -208,7 +254,10 @@ var PhantasmaAPI = /** @class */ (function () {
                 switch (_a.label) {
                     case 0:
                         params = [chainInput];
-                        return [4 /*yield*/, this.JSONRPC("getBlockHeight", params)];
+                        if ( this.isRPC )
+                            return [4 /*yield*/, this.JSONRPC("getBlockHeight", params)];
+                        else
+                            return [4 /*yield*/, this.RESTAPI("getBlockHeight", params)];
                     case 1: return [2 /*return*/, (_a.sent())];
                 }
             });
@@ -222,7 +271,11 @@ var PhantasmaAPI = /** @class */ (function () {
                 switch (_a.label) {
                     case 0:
                         params = [blockHash];
-                        return [4 /*yield*/, this.JSONRPC("getBlockTransactionCountByHash", params)];
+                        if ( this.isRPC )
+                            return [4 /*yield*/, this.JSONRPC("getBlockTransactionCountByHash", params)];
+                        else
+                            return [4 /*yield*/, this.RESTAPI("getBlockTransactionCountByHash", params)];
+
                     case 1: return [2 /*return*/, (_a.sent())];
                 }
             });
@@ -236,7 +289,10 @@ var PhantasmaAPI = /** @class */ (function () {
                 switch (_a.label) {
                     case 0:
                         params = [blockHash];
-                        return [4 /*yield*/, this.JSONRPC("getBlockByHash", params)];
+                        if ( this.isRPC )
+                            return [4 /*yield*/, this.JSONRPC("getBlockByHash", params)];
+                        else
+                            return [4 /*yield*/, this.RESTAPI("getBlockByHash", params)];
                     case 1: return [2 /*return*/, (_a.sent())];
                 }
             });
@@ -250,7 +306,11 @@ var PhantasmaAPI = /** @class */ (function () {
                 switch (_a.label) {
                     case 0:
                         params = [blockHash];
-                        return [4 /*yield*/, this.JSONRPC("getRawBlockByHash", params)];
+                        if ( this.isRPC )
+                            return [4 /*yield*/, this.JSONRPC("getRawBlockByHash", params)];
+                        else
+                            return [4 /*yield*/, this.RESTAPI("getRawBlockByHash", params)];
+
                     case 1: return [2 /*return*/, (_a.sent())];
                 }
             });
@@ -264,7 +324,10 @@ var PhantasmaAPI = /** @class */ (function () {
                 switch (_a.label) {
                     case 0:
                         params = [chainInput, height];
-                        return [4 /*yield*/, this.JSONRPC("getBlockByHeight", params)];
+                        if ( this.isRPC )
+                            return [4 /*yield*/, this.JSONRPC("getBlockByHeight", params)];
+                        else
+                            return [4 /*yield*/, this.RESTAPI("getBlockByHeight", params)];
                     case 1: return [2 /*return*/, (_a.sent())];
                 }
             });
@@ -278,7 +341,10 @@ var PhantasmaAPI = /** @class */ (function () {
                 switch (_a.label) {
                     case 0:
                         params = [chainInput, height];
-                        return [4 /*yield*/, this.JSONRPC("getRawBlockByHeight", params)];
+                        if ( this.isRPC )
+                            return [4 /*yield*/, this.JSONRPC("getRawBlockByHeight", params)];
+                        else
+                            return [4 /*yield*/, this.RESTAPI("getRawBlockByHeight", params)];
                     case 1: return [2 /*return*/, (_a.sent())];
                 }
             });
@@ -292,7 +358,10 @@ var PhantasmaAPI = /** @class */ (function () {
                 switch (_a.label) {
                     case 0:
                         params = [blockHash, index];
-                        return [4 /*yield*/, this.JSONRPC("getTransactionByBlockHashAndIndex", params)];
+                        if ( this.isRPC )
+                            return [4 /*yield*/, this.JSONRPC("getTransactionByBlockHashAndIndex", params)];
+                        else
+                            return [4 /*yield*/, this.RESTAPI("getTransactionByBlockHashAndIndex", params)];
                     case 1: return [2 /*return*/, (_a.sent())];
                 }
             });
@@ -306,7 +375,10 @@ var PhantasmaAPI = /** @class */ (function () {
                 switch (_a.label) {
                     case 0:
                         params = [account, page, pageSize];
-                        return [4 /*yield*/, this.JSONRPC("getAddressTransactions", params)];
+                        if ( this.isRPC )
+                            return [4 /*yield*/, this.JSONRPC("getAddressTransactions", params)];
+                        else
+                            return [4 /*yield*/, this.RESTAPI("getAddressTransactions", params)];
                     case 1: return [2 /*return*/, (_a.sent())];
                 }
             });
@@ -320,7 +392,10 @@ var PhantasmaAPI = /** @class */ (function () {
                 switch (_a.label) {
                     case 0:
                         params = [account, chainInput];
-                        return [4 /*yield*/, this.JSONRPC("getAddressTransactionCount", params)];
+                        if ( this.isRPC )
+                            return [4 /*yield*/, this.JSONRPC("getAddressTransactionCount", params)];
+                        else
+                            return [4 /*yield*/, this.RESTAPI("getAddressTransactionCount", params)];
                     case 1: return [2 /*return*/, (_a.sent())];
                 }
             });
@@ -334,7 +409,10 @@ var PhantasmaAPI = /** @class */ (function () {
                 switch (_a.label) {
                     case 0:
                         params = [txData];
-                        return [4 /*yield*/, this.JSONRPC("sendRawTransaction", params)];
+                        if ( this.isRPC )
+                            return [4 /*yield*/, this.JSONRPC("sendRawTransaction", params)];
+                        else
+                            return [4 /*yield*/, this.RESTAPI("sendRawTransaction", params)];
                     case 1: return [2 /*return*/, (_a.sent())];
                 }
             });
@@ -348,7 +426,10 @@ var PhantasmaAPI = /** @class */ (function () {
                 switch (_a.label) {
                     case 0:
                         params = [chainInput, scriptData];
-                        return [4 /*yield*/, this.JSONRPC("invokeRawScript", params)];
+                        if ( this.isRPC )
+                            return [4 /*yield*/, this.JSONRPC("invokeRawScript", params)];
+                        else
+                            return [4 /*yield*/, this.RESTAPI("invokeRawScript", params)];
                     case 1: return [2 /*return*/, (_a.sent())];
                 }
             });
@@ -362,7 +443,10 @@ var PhantasmaAPI = /** @class */ (function () {
                 switch (_a.label) {
                     case 0:
                         params = [hashText];
-                        return [4 /*yield*/, this.JSONRPC("getTransaction", params)];
+                        if ( this.isRPC )
+                            return [4 /*yield*/, this.JSONRPC("getTransaction", params)];
+                        else
+                            return [4 /*yield*/, this.RESTAPI("getTransaction", params)];
                     case 1: return [2 /*return*/, (_a.sent())];
                 }
             });
@@ -376,7 +460,10 @@ var PhantasmaAPI = /** @class */ (function () {
                 switch (_a.label) {
                     case 0:
                         params = [hashText];
-                        return [4 /*yield*/, this.JSONRPC("cancelTransaction", params)];
+                        if ( this.isRPC )
+                            return [4 /*yield*/, this.JSONRPC("cancelTransaction", params)];
+                        else
+                            return [4 /*yield*/, this.RESTAPI("cancelTransaction", params)];
                     case 1: return [2 /*return*/, (_a.sent())];
                 }
             });
@@ -390,7 +477,10 @@ var PhantasmaAPI = /** @class */ (function () {
                 switch (_a.label) {
                     case 0:
                         params = [];
-                        return [4 /*yield*/, this.JSONRPC("getChains", params)];
+                        if ( this.isRPC )
+                            return [4 /*yield*/, this.JSONRPC("getChains", params)];
+                        else
+                            return [4 /*yield*/, this.RESTAPI("getChains", params)];
                     case 1: return [2 /*return*/, (_a.sent())];
                 }
             });
@@ -404,7 +494,10 @@ var PhantasmaAPI = /** @class */ (function () {
                 switch (_a.label) {
                     case 0:
                         params = [];
-                        return [4 /*yield*/, this.JSONRPC("getNexus", params)];
+                        if ( this.isRPC )
+                            return [4 /*yield*/, this.JSONRPC("getNexus", params)];
+                        else
+                            return [4 /*yield*/, this.RESTAPI("getNexus", params)];
                     case 1: return [2 /*return*/, (_a.sent())];
                 }
             });
@@ -418,7 +511,10 @@ var PhantasmaAPI = /** @class */ (function () {
                 switch (_a.label) {
                     case 0:
                         params = [ID];
-                        return [4 /*yield*/, this.JSONRPC("getOrganization", params)];
+                        if ( this.isRPC )
+                            return [4 /*yield*/, this.JSONRPC("getOrganization", params)];
+                        else
+                            return [4 /*yield*/, this.RESTAPI("getOrganization", params)];
                     case 1: return [2 /*return*/, (_a.sent())];
                 }
             });
@@ -432,7 +528,10 @@ var PhantasmaAPI = /** @class */ (function () {
                 switch (_a.label) {
                     case 0:
                         params = [name];
-                        return [4 /*yield*/, this.JSONRPC("getLeaderboard", params)];
+                        if ( this.isRPC )
+                            return [4 /*yield*/, this.JSONRPC("getLeaderboard", params)];
+                        else
+                            return [4 /*yield*/, this.RESTAPI("getLeaderboard", params)];
                     case 1: return [2 /*return*/, (_a.sent())];
                 }
             });
@@ -446,7 +545,10 @@ var PhantasmaAPI = /** @class */ (function () {
                 switch (_a.label) {
                     case 0:
                         params = [];
-                        return [4 /*yield*/, this.JSONRPC("getTokens", params)];
+                        if ( this.isRPC )
+                            return [4 /*yield*/, this.JSONRPC("getTokens", params)];
+                        else
+                            return [4 /*yield*/, this.RESTAPI("getTokens", params)];
                     case 1: return [2 /*return*/, (_a.sent())];
                 }
             });
@@ -460,7 +562,10 @@ var PhantasmaAPI = /** @class */ (function () {
                 switch (_a.label) {
                     case 0:
                         params = [symbol];
-                        return [4 /*yield*/, this.JSONRPC("getToken", params)];
+                        if ( this.isRPC )
+                            return [4 /*yield*/, this.JSONRPC("getToken", params)];
+                        else
+                            return [4 /*yield*/, this.RESTAPI("getToken", params)];
                     case 1: return [2 /*return*/, (_a.sent())];
                 }
             });
@@ -474,7 +579,10 @@ var PhantasmaAPI = /** @class */ (function () {
                 switch (_a.label) {
                     case 0:
                         params = [symbol, IDtext];
-                        return [4 /*yield*/, this.JSONRPC("getTokenData", params)];
+                        if ( this.isRPC )
+                            return [4 /*yield*/, this.JSONRPC("getTokenData", params)];
+                        else
+                            return [4 /*yield*/, this.RESTAPI("getTokenData", params)];
                     case 1: return [2 /*return*/, (_a.sent())];
                 }
             });
@@ -488,7 +596,10 @@ var PhantasmaAPI = /** @class */ (function () {
                 switch (_a.label) {
                     case 0:
                         params = [account, tokenSymbol, chainInput];
-                        return [4 /*yield*/, this.JSONRPC("getTokenBalance", params)];
+                        if ( this.isRPC )
+                            return [4 /*yield*/, this.JSONRPC("getTokenBalance", params)];
+                        else
+                            return [4 /*yield*/, this.RESTAPI("getTokenBalance", params)];
                     case 1: return [2 /*return*/, (_a.sent())];
                 }
             });
@@ -502,7 +613,10 @@ var PhantasmaAPI = /** @class */ (function () {
                 switch (_a.label) {
                     case 0:
                         params = [chainAddressOrName, symbol];
-                        return [4 /*yield*/, this.JSONRPC("getAuctionsCount", params)];
+                        if ( this.isRPC )
+                            return [4 /*yield*/, this.JSONRPC("getAuctionsCount", params)];
+                        else
+                            return [4 /*yield*/, this.RESTAPI("getAuctionsCount", params)];
                     case 1: return [2 /*return*/, (_a.sent())];
                 }
             });
@@ -516,7 +630,10 @@ var PhantasmaAPI = /** @class */ (function () {
                 switch (_a.label) {
                     case 0:
                         params = [chainAddressOrName, symbol, page, pageSize];
-                        return [4 /*yield*/, this.JSONRPC("getAuctions", params)];
+                        if ( this.isRPC )
+                            return [4 /*yield*/, this.JSONRPC("getAuctions", params)];
+                        else
+                            return [4 /*yield*/, this.RESTAPI("getAuctions", params)];
                     case 1: return [2 /*return*/, (_a.sent())];
                 }
             });
@@ -530,7 +647,11 @@ var PhantasmaAPI = /** @class */ (function () {
                 switch (_a.label) {
                     case 0:
                         params = [chainAddressOrName, symbol, IDtext];
-                        return [4 /*yield*/, this.JSONRPC("getAuction", params)];
+                        if ( this.isRPC )
+                            return [4 /*yield*/, this.JSONRPC("getAuction", params)];
+                        else
+                            return [4 /*yield*/, this.RESTAPI("getAuction", params)];
+
                     case 1: return [2 /*return*/, (_a.sent())];
                 }
             });
@@ -544,7 +665,10 @@ var PhantasmaAPI = /** @class */ (function () {
                 switch (_a.label) {
                     case 0:
                         params = [hashText];
-                        return [4 /*yield*/, this.JSONRPC("getArchive", params)];
+                        if ( this.isRPC )
+                            return [4 /*yield*/, this.JSONRPC("getArchive", params)];
+                        else
+                            return [4 /*yield*/, this.RESTAPI("getArchive", params)];
                     case 1: return [2 /*return*/, (_a.sent())];
                 }
             });
@@ -558,7 +682,10 @@ var PhantasmaAPI = /** @class */ (function () {
                 switch (_a.label) {
                     case 0:
                         params = [hashText, blockIndex, blockContent];
-                        return [4 /*yield*/, this.JSONRPC("writeArchive", params)];
+                        if ( this.isRPC )
+                            return [4 /*yield*/, this.JSONRPC("writeArchive", params)];
+                        else
+                            return [4 /*yield*/, this.RESTAPI("writeArchive", params)];
                     case 1: return [2 /*return*/, (_a.sent())];
                 }
             });
@@ -572,7 +699,10 @@ var PhantasmaAPI = /** @class */ (function () {
                 switch (_a.label) {
                     case 0:
                         params = [chainAddressOrName, contractName];
-                        return [4 /*yield*/, this.JSONRPC("getABI", params)];
+                        if ( this.isRPC )
+                            return [4 /*yield*/, this.JSONRPC("getABI", params)];
+                        else
+                            return [4 /*yield*/, this.RESTAPI("getABI", params)];
                     case 1: return [2 /*return*/, (_a.sent())];
                 }
             });
@@ -586,7 +716,10 @@ var PhantasmaAPI = /** @class */ (function () {
                 switch (_a.label) {
                     case 0:
                         params = [];
-                        return [4 /*yield*/, this.JSONRPC("getPeers", params)];
+                        if ( this.isRPC )
+                            return [4 /*yield*/, this.JSONRPC("getPeers", params)];
+                        else
+                            return [4 /*yield*/, this.RESTAPI("getPeers", params)];
                     case 1: return [2 /*return*/, (_a.sent())];
                 }
             });
@@ -600,7 +733,10 @@ var PhantasmaAPI = /** @class */ (function () {
                 switch (_a.label) {
                     case 0:
                         params = [receiptHex];
-                        return [4 /*yield*/, this.JSONRPC("relaySend", params)];
+                        if ( this.isRPC )
+                            return [4 /*yield*/, this.JSONRPC("relaySend", params)];
+                        else
+                            return [4 /*yield*/, this.RESTAPI("relaySend", params)];
                     case 1: return [2 /*return*/, (_a.sent())];
                 }
             });
@@ -614,7 +750,10 @@ var PhantasmaAPI = /** @class */ (function () {
                 switch (_a.label) {
                     case 0:
                         params = [account];
-                        return [4 /*yield*/, this.JSONRPC("relayReceive", params)];
+                        if ( this.isRPC )
+                            return [4 /*yield*/, this.JSONRPC("relayReceive", params)];
+                        else
+                            return [4 /*yield*/, this.RESTAPI("relayReceive", params)];
                     case 1: return [2 /*return*/, (_a.sent())];
                 }
             });
@@ -628,7 +767,10 @@ var PhantasmaAPI = /** @class */ (function () {
                 switch (_a.label) {
                     case 0:
                         params = [account];
-                        return [4 /*yield*/, this.JSONRPC("getEvents", params)];
+                        if ( this.isRPC )
+                            return [4 /*yield*/, this.JSONRPC("getEvents", params)];
+                        else
+                            return [4 /*yield*/, this.RESTAPI("getEvents", params)];
                     case 1: return [2 /*return*/, (_a.sent())];
                 }
             });
@@ -642,7 +784,10 @@ var PhantasmaAPI = /** @class */ (function () {
                 switch (_a.label) {
                     case 0:
                         params = [];
-                        return [4 /*yield*/, this.JSONRPC("getPlatforms", params)];
+                        if ( this.isRPC )
+                            return [4 /*yield*/, this.JSONRPC("getPlatforms", params)];
+                        else
+                            return [4 /*yield*/, this.RESTAPI("getPlatforms", params)];
                     case 1: return [2 /*return*/, (_a.sent())];
                 }
             });
@@ -656,7 +801,10 @@ var PhantasmaAPI = /** @class */ (function () {
                 switch (_a.label) {
                     case 0:
                         params = [];
-                        return [4 /*yield*/, this.JSONRPC("getValidators", params)];
+                        if ( this.isRPC )
+                            return [4 /*yield*/, this.JSONRPC("getValidators", params)];
+                        else
+                            return [4 /*yield*/, this.RESTAPI("getValidators", params)];
                     case 1: return [2 /*return*/, (_a.sent())];
                 }
             });
@@ -670,7 +818,10 @@ var PhantasmaAPI = /** @class */ (function () {
                 switch (_a.label) {
                     case 0:
                         params = [sourcePlatform, destPlatform, hashText];
-                        return [4 /*yield*/, this.JSONRPC("settleSwap", params)];
+                        if ( this.isRPC )
+                            return [4 /*yield*/, this.JSONRPC("settleSwap", params)];
+                        else
+                            return [4 /*yield*/, this.RESTAPI("settleSwap", params)];
                     case 1: return [2 /*return*/, (_a.sent())];
                 }
             });
@@ -684,7 +835,10 @@ var PhantasmaAPI = /** @class */ (function () {
                 switch (_a.label) {
                     case 0:
                         params = [account];
-                        return [4 /*yield*/, this.JSONRPC("getSwapsForAddress", params)];
+                        if ( this.isRPC )
+                            return [4 /*yield*/, this.JSONRPC("getSwapsForAddress", params)];
+                        else
+                            return [4 /*yield*/, this.RESTAPI("getSwapsForAddress", params)];
                     case 1: return [2 /*return*/, (_a.sent())];
                 }
             });
@@ -698,7 +852,11 @@ var PhantasmaAPI = /** @class */ (function () {
                 switch (_a.label) {
                     case 0:
                         params = [symbol, nftId, true];
-                        return [4 /*yield*/, this.JSONRPC("getNFT", params)];
+                        if ( this.isRPC )
+                            return [4 /*yield*/, this.JSONRPC("getNFT", params)];
+                        else
+                            return [4 /*yield*/, this.RESTAPI("getNFT", params)];
+
                     case 1: return [2 /*return*/, (_a.sent())];
                 }
             });
